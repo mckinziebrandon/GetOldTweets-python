@@ -1,12 +1,4 @@
-DEFAULT_ATTRIBUTES = [
-        'sender',
-        'receiver',
-        'date',
-        'text',
-        'id',
-        'permalink'
-        ]
-
+from got3.globals import DEFAULT_ATTRIBUTES
 
 class Tweet:
 

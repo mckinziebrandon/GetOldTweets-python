@@ -5,6 +5,7 @@ import getopt
 import datetime
 import codecs
 import got3
+from got3.globals import DEFAULT_ATTRIBUTES
 
 DEFAULT_FILENAME = 'output_got.csv'
 
@@ -54,33 +55,16 @@ def main(argv):
         # Note: w+ better than w, because w will fail if the file already exists.
         with open(outputFileName, 'w+', encoding='utf-8', newline='') as outputFile:
 
-            fieldnames = [
-                'sender',
-                'receiver',
-                'date',
-                'text',
-                'id',
-                'permalink']
             writer = csv.DictWriter(
                 outputFile,
-                fieldnames=fieldnames,
+                fieldnames=DEFAULT_ATTRIBUTES,
                 delimiter=',')
             writer.writeheader()
-            #outputFile.write(','.join(columns))
 
             print('Searching...\n')
             def receiveBuffer(tweets):
                 for t in tweets:
                     writer.writerow(t)
-
-            def receiveBufferOld(tweets):
-                for t in tweets:
-                    outputFile.write(('\n%s,%s,%s,"%s",%d,%s') % (
-                        t.username, t.replying_to, t.date.strftime("%Y-%m-%d %H:%M"),
-                        t.text, int(t.id), t.permalink))
-                    outputFile.flush();
-                    print('More %d saved on file...\n' % len(tweets))
-
             got3.manager.TweetManager.getTweets(tweetCriteria, receiveBuffer)
 
     except arg:
