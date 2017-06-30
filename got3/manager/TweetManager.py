@@ -42,6 +42,9 @@ class TweetManager:
                 break
 
             refreshCursor = json['min_position']
+
+            # Gets a list of all elements <div class=js-stream-tweet .../>
+            # (These are the individual tweet cards.)
             tweets = PyQuery(json['items_html'])('div.js-stream-tweet')
 
             if len(tweets) == 0:
@@ -51,8 +54,7 @@ class TweetManager:
                 tweetPQ = PyQuery(tweetHTML)
                 tweet = models.Tweet()
 
-                #usernameTweet = tweetPQ("span.username.js-action-profile-name b").text();
-                usernameTweet = tweetPQ("span:first.username.u-dir b").text()
+                twitter_handle = tweetPQ("span:first.username.u-dir b").text()
                 txt = re.sub(r"\s+", " ",
                         tweetPQ("p.js-tweet-text").text().replace('# ', '#').replace('@ ', '@'));
                 retweets = int(tweetPQ("span.ProfileTweet-action--retweet span.ProfileTweet-actionCount")
@@ -67,7 +69,11 @@ class TweetManager:
                 permalink = tweetPQ.attr("data-permalink-path");
                 user_id = int(tweetPQ("a.js-user-profile-link")
                         .attr("data-user-id"))
-                receiver = tweetPQ("div.ReplyingToContextBelowAuthor span.username b").text()
+
+                receivers = tweetPQ("div.ReplyingToContextBelowAuthor span.username b").text()
+                for mention in re.compile('(@\\w*)').findall(txt):
+                    if mention not in receivers:
+                        receivers += ' ' + mention[1:]  # Don't include the '@' symbol.
 
                 geo = ''
                 geoSpan = tweetPQ('span.Tweet-geo')
@@ -79,21 +85,25 @@ class TweetManager:
                         urls.append((link.attrib["data-expanded-url"]))
                     except KeyError:
                         pass
+
                 tweet.id = id
                 tweet.permalink = 'https://twitter.com' + permalink
-                tweet.username = usernameTweet
-
+                tweet.sender = twitter_handle
                 tweet.text = txt
                 tweet.date = datetime.datetime.fromtimestamp(dateSec)
                 tweet.formatted_date = datetime.datetime.fromtimestamp(dateSec).strftime("%a %b %d %X +0000 %Y")
                 tweet.retweets = retweets
                 tweet.favorites = favorites
-                tweet.mentions = " ".join(re.compile('(@\\w*)').findall(tweet.text))
+
+                # Then the handle was just mentioned (without using @sign) -- we don't care about that.
+                if not receivers:
+                    continue
+
                 tweet.hashtags = " ".join(re.compile('(#\\w*)').findall(tweet.text))
                 tweet.geo = geo
                 tweet.urls = ",".join(urls)
                 tweet.author_id = user_id
-                tweet.receiver = receiver
+                tweet.receivers = receivers
 
                 tweet = tweet.as_dict()
                 results.append(tweet)

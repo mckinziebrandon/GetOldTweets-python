@@ -1,9 +1,11 @@
 DEFAULT_ATTRIBUTES = [
         'sender',
-        'receiver',
+        'receivers',
         'date',
         'text',
         'id',
-        'permalink'
+        'permalink',
+        'retweets',
+        'favorites',
         ]
 
