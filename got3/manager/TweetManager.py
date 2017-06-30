@@ -52,15 +52,22 @@ class TweetManager:
                 tweet = models.Tweet()
 
                 #usernameTweet = tweetPQ("span.username.js-action-profile-name b").text();
-                usernameTweet = tweetPQ("span:first.username.u-dir b").text();
-                txt = re.sub(r"\s+", " ", tweetPQ("p.js-tweet-text").text().replace('# ', '#').replace('@ ', '@'));
-                retweets = int(tweetPQ("span.ProfileTweet-action--retweet span.ProfileTweet-actionCount").attr("data-tweet-stat-count").replace(",", ""));
-                favorites = int(tweetPQ("span.ProfileTweet-action--favorite span.ProfileTweet-actionCount").attr("data-tweet-stat-count").replace(",", ""));
-                dateSec = int(tweetPQ("small.time span.js-short-timestamp").attr("data-time"));
+                usernameTweet = tweetPQ("span:first.username.u-dir b").text()
+                txt = re.sub(r"\s+", " ",
+                        tweetPQ("p.js-tweet-text").text().replace('# ', '#').replace('@ ', '@'));
+                retweets = int(tweetPQ("span.ProfileTweet-action--retweet span.ProfileTweet-actionCount")
+                        .attr("data-tweet-stat-count")
+                        .replace(",", ""));
+                favorites = int(tweetPQ("span.ProfileTweet-action--favorite span.ProfileTweet-actionCount")
+                        .attr("data-tweet-stat-count")
+                        .replace(",", ""));
+                dateSec = int(tweetPQ("small.time span.js-short-timestamp")
+                        .attr("data-time"));
                 id = tweetPQ.attr("data-tweet-id");
                 permalink = tweetPQ.attr("data-permalink-path");
-                user_id = int(tweetPQ("a.js-user-profile-link").attr("data-user-id"))
-                replying_to = tweetPQ("div.ReplyingToContextBelowAuthor span.username b").text()
+                user_id = int(tweetPQ("a.js-user-profile-link")
+                        .attr("data-user-id"))
+                receiver = tweetPQ("div.ReplyingToContextBelowAuthor span.username b").text()
 
                 geo = ''
                 geoSpan = tweetPQ('span.Tweet-geo')
@@ -86,8 +93,9 @@ class TweetManager:
                 tweet.geo = geo
                 tweet.urls = ",".join(urls)
                 tweet.author_id = user_id
-                tweet.replying_to = replying_to
+                tweet.receiver = receiver
 
+                tweet = tweet.as_dict()
                 results.append(tweet)
                 resultsAux.append(tweet)
 
